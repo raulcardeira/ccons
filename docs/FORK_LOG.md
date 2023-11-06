@@ -27,6 +27,8 @@ Initially I was a bit dismayed because of the unsuccessful build. But I studied 
 
 So, now, I have two things that I want to do. The first one is to build a version of `LLVM` that can be used to build `ccons`, so that I can try it. After that, and if I'm successful, I also plan to try to patch `ccons` so that it can use a more recent version of `LLVM`. I don't know what that will entail, but I think that it can prove a useful and fun learning experience. 
 
+---
+
 ## DAY 1: 2023/11/02
 
 Yesterday was an Holiday here in Portugal, so I didn't work on this project. So, let's begin.
@@ -147,3 +149,50 @@ At this point, I started to suffer a bit from demotivation due to all the failed
 So, I decided to find another way in which I could progress in this project. And the way was simple: it was simply the correct time to ask for help. While initially I had envisioned that I would try to tackle this project on my own, for the biggest learning experience (and also a kind of test of my capabilities), I had also planned that if I find the task too demanding, I would seek help. And this is actually a really good strategy, because, as one of my goals with this project was to showcase my skills to a prospective employer, it is actually good that I can show that I can ask for help when I need it. This is a very important, often underlooked skill. In my past professional life I suffered at times from not asking for help, which resulted in a not-optimal outcome for the project I was dealing with. So, with this, I decided to create a post on the `r/C_Programming` asking if someone would be interested in providing me with guidance in this project or even become a collaborator in it.
 
 And that ends DAY 1.
+
+---
+
+## DAY 2: 2023/11/04
+
+When beginning this day, the immediate thing that I noticed is a big mistake right at the beginning of this project. The fact is that I blindly assumed that, because `ccons` is a C ecosystem tool, it was written in C. But it is not. It is almost entire written in C++. By blindly assuming it was written in C, I didn't even look at the source code files, where I could have seen that they end in `.cpp`. Also, the compiler was outputing it was compiling C++ code. 
+
+So, at this point I had to think that, if my initial goal was to learn C, then perhaps this project is not the best for it. On the other hand, I really want to try to use `ccons`, even if just for fun. I am also learning a lot from working with these build processes. So, I decided to continue with the project, and at least try to accomplish goal 1: Just using `ccons`.
+
+Then, I noticed another thing. I did a `git log` in the `ccons` repository, and saw that in one of the last commits, the author of the tool mentions the use of `LLVM` 3.3. So, I downloaded this release from the `LLVM` website. Unfortunately, I couldn't find the installation instructions on the release notes, like it had happened before. But, I went to check in the source directory, and found the `docs` directory, which contained a `README.txt`. In that, I learned that at this point the `LLVM` developers had moved to the `Sphinx` documentation generation system. But they also mentioned that the source files for the document, that end in the `.rst` ending, should be quite readable in source form.
+
+I browsed the files in the `docs` folder and saw the `GettingStarted.rst` file. In there, the developers recommend the use of `gcc` 4.2. So, I will try to use this version of `gcc`. The issue, though, is that I don't know if I will be able to build `gcc` 4.2. Also, because I'm somewhat tired of trying to build these tools, I decided that I could look for a binary distribution of `gcc` instead. But, the reality is that I was unable to find one. It seems there doesn't exist some kind of repository containing all the `gcc` releases in binary format. 
+
+At this point, I noticed that the `LLVM` developers also recommend the use of `clang` to compile `LLVM`. So, I went to search for binary distributions of `LLVM`. And, in fact, the developers provide them, in the same page as the source code release. I downloaded the binary for `clang` version 3.3, which also includes `LLVM` 3.3. Once extracted, I proceeded to try to build `LLVM` 3.3 with the binary of `clang` and `LLVM` version 3.3. To do this, I had to set up the `CC` and `CXX` environment variables for the `LLVM` `configure` script to use the binary version that I just downloaded, with the following commands:
+
+```
+cwolf_ubuntu@DESKTOP-0Q10SDT:/mnt/c/Users/cwolf/Desktop/raul/c/llvm-3.3-binary/clang+llvm-3.3-Ubuntu-13.04-x86_64-linux-gnu/bin$ export CC="/mnt/c/Users/cwolf/Desktop/raul/c/llvm-3.3-binary/clang+llvm-3.3-Ubuntu-13.04-x86_64-linux-gnu/bin/clang"
+cwolf_ubuntu@DESKTOP-0Q10SDT:/mnt/c/Users/cwolf/Desktop/raul/c/llvm-3.3-binary/clang+llvm-3.3-Ubuntu-13.04-x86_64-linux-gnu/bin$ export CXX="/mnt/c/Users/cwolf/Desktop/raul/c/llvm-3.3-binary/clang+llvm-3.3-Ubuntu-13.04-x86_64-linux-gnu/bin/clang++"
+```
+
+Unfortunately, when running the `LLVM` 3.3 `configure` script, I encountered the error:
+
+```
+checking for C compiler default output file name... configure: error: C compiler cannot create executables
+See `config.log' for more details.
+```
+
+I had never encountered this error before, so I didn't know what it meant. To debug it, I tried running the `clang` compiler on a simple "Hello, world" C program, but I got the error:
+
+```
+/..//bin/ld: cannot find crtbegin.o: No such file or directory
+/..//bin/ld: cannot find -lgcc: No such file or directory
+/..//bin/ld: cannot find -lgcc_s: No such file or directory
+clang: error: linker command failed with exit code 1 (use -v to see invocation)
+```
+
+I then thought that this can be because the version of `clang` and `LLVM` I downloaded is for Ubuntu 13.04. 
+
+At this point, I started to consider that I could set up, with Docker, an Ubuntu environment (with Ubuntu 13.04, for example), and use this environment to try to compile `ccons`. Because, along the way, I learned that I could set up `apt` to look for the version of software that I want in a specific Debian "snapshot". I would just need to find a good snapshot.
+
+Unfortunately, when looking for Ubuntu 13.04 images on Docker, I didn't find any official images from Canonical (probably because this version of Ubuntu is not supported or recommended anymore).
+
+Also, upon trying my system's Docker installation, I noticed that it isn't correctly set up, as I probably messed up with it (my work environment is based on Windows+WSL2, and I'm not a big fan of the Docker Desktop application for Windows).
+
+So, at this point, I decided that I've already done a good attempt at trying to use `ccons`. Also, my requests for help weren't successful, so I am not feeling like continuing on this project completely alone. I also feel that even though I didn't achieve even the first main objective, I actually achieved some overall learning and progress in my ability as a dev. There's also this document, which for me serves as a proof-of-work that I can write good technical documentation.
+
+So, in conclusion, I have mixed feelings for this project. While on one hand, I learned a lot, like I explained before, I still would have really liked to use `ccons`. But because I found it a somewhat hard project, it was actually a bit demanding on my capabilities and left me somewhat exhausted (mostly due to working completely on my own which can be draining on one's energies).
